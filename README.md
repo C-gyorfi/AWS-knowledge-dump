@@ -18,8 +18,14 @@
   - [EBS Volume Types and Use cases](#EBS-Volume-Types-and-Use-cases)
   - [EBS Multi-Attach](#EBS-Multi-Attach)
   - [EFS / Elastic File System](#EFS-/-Elastic-File-System)
-
-
+- [Load Balancing and Auto Scaling](#Load-Balancing-and-Auto-Scaling)
+  - [Load balancer](#Load-balancer)
+  - [Types of Load balancer](#Types-of-Load-balancer)
+  - [More about load balancing](#More-about-load-balancing)
+  - [SSL/TLS](#SSL/TLS)
+  - [Connection Draining](#Connection-Draining)
+  - [Auto Scaling Group](#Auto-Scaling-Group)
+  - [ASG Scaling Policies](#ASG-Scaling-Policies)
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
 - It is a Global service
@@ -111,5 +117,73 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 - Can be used multi-AZ
 - use-cases: content management, web serving, data sharing
 - only works with Linux based AMI
+
+# [Back to content](#content)
+
+## Load Balancing and Auto Scaling
+> Vertical Scalability - increasing the size of an instance(hardware limits)
+
+> Horizontal Scalability - increasting the number of instances
+
+> High Availability - runnging the app in multiple data centers(e.g multi AZ)
+
+### Load balancer:
+- Distribute load across multiple instances
+- Allows using single endpoint (DNS) 
+- Does regular health checks on instnces
+- Handle failure / Terminates unhealthy instances
+- SSL termination (HTTPS)
+- Can enforce stickiness (by using cookies to forward request to same instance)
+
+### Types of Load balancer:
+- Classic Load Balancer(v1) HTTP, HTTPS, TCP
+  - has fixed hostname 
+- Application Load Balancer(v2) HTTP, HTTPS, WebSocket
+  - load balancing multiple application on same machine or accross machines
+  - support for HTTP/2 and WebSocket
+  - allows routin based on path, hostname or query param
+  - great for containerised apps(docker or ECS)
+  - fixed hostname
+  - client of the IP is in the header `X-Forwarded-For`
+- Network Load Balancer(v2) TCP, TLS (secure TCP) & UDP
+  - Allows forwarding TCP & UDP traffic
+  - Can handle a lot(millions of request per seconds)
+  - Low latency (~100 ms vs 400 ms for ALB))
+  - Has a single static IP per AZ
+  - Supports Elastic IP
+  - Not free
+
+### More about load balancing:
+- Config LB security group to allow public traffic(in most cases)
+- Config application security group to allow traffic from LB
+- LB can scale but may take time
+
+### SSL/TLS 
+- SSL(Secure Sockets Layer) and TLS(Transport Layer Security)
+- allows traffic between clients and load balancer to be encrypted
+- can manage certificates with ACM (AWS Certificate Manager) - to upload your own
+- LB uses uses an X.509 certificate by default
+- Clients can use SNI (Server Name Indication) - allows loading multiple SSL certificates onto one web server - works for ALB & NLB but not for CLB(depreciated)
+
+### Connection Draining
+- Connection Draining(CLB) or DeregistrationDelay(for ALB & NLB)
+- Time to complete request while instance is deregistering
+- Default 300sec can be set 1-3600(depends on avg request completion time)
+- set 0 to disable
+
+### Auto Scaling Group
+- Matching demand
+- Scale out = add instances
+- Scale in = remove EC2 instances) 
+- Can set minimum and a maximum number of instances
+- Can scale an ASG based on CloudWatch alarms(e.g CPU use)
+- Free, you pay for the resources you run
+- IAM roles attached to an ASG will get assigned to EC2 instances
+- Cooldown period to ensure not to launch or terminate additional instances before the previous scaling activity completed
+
+### ASG Scaling Policies
+- Target Tracking Scaling (e.g set target CPU usage)
+- Step Scaling (e.g CloudWatch alarm is trigger)
+- Scheduled Actions (e.g action based on known usage patterns)
 
 # [Back to content](#content)
