@@ -31,7 +31,7 @@
   - [RDS Autoscaling](#RDS-Autoscaling)
   - [RDS Read Replicas](#RDS-Read-Replicas)
   - [RDS Multi AZ](#RDS-Multi-AZ)
-  - [RDS Security and encription](#RDS-Security-and-encription)
+  - [RDS Security and encryption](#RDS-Security-and-encryption)
   - [RDS Network](#RDS-Network)
   - [RDS Access Management](#RDS-Access-Management)
 
@@ -92,7 +92,7 @@ Can run a bootstrap script at first boot to setup(EC2 User data script)
 - Security Groups control what is allowed into / out of the instances
 - Referenced by IP or by name
 - Control access to Ports
-- Control authorised IP ranges(IPv4, IPv6)
+- Control authorized IP ranges(IPv4, IPv6)
 
 ### Purchasing Options
 - On-Demand Instances: no long term commitment, pay per min (or hours on windows)
@@ -109,11 +109,11 @@ Can run a bootstrap script at first boot to setup(EC2 User data script)
 ## EC2 Instance Storage
 EC2 Instance Storage are high-performance hardware disk(EBS are network drives with limited performance)
 - ephemeral storage(loses data once they got stopped)
-- usecases: buffer / cache / scratch data / temp storage
+- use-cases: buffer / cache / scratch data / temp storage
 
 ### EBS Volume Types and Use cases
 - `General Purpose SSD`: cheap and low latency, good for System boot volumes,Virtual desktops, Dev environments
-- `Provisioned IOPS (PIOPS) SSD`: sutained IOPS or applications that need more than 16,000 IOPS, e.g databases workloads (sensitive to storage perf and consistency)
+- `Provisioned IOPS (PIOPS) SSD`: sustained IOPS or applications that need more than 16,000 IOPS, e.g databases workloads (sensitive to storage perf and consistency)
 - `Hard Disk Drives (HDD)`: cannot be boot volume, throughput optimized HDD (st1)
 good for big data, data Warehouses or cold HDD (sc1) data that is infrequently accessed. 
 
@@ -132,14 +132,14 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 ## Load Balancing and Auto Scaling
 > Vertical Scalability - increasing the size of an instance(hardware limits)
 
-> Horizontal Scalability - increasting the number of instances
+> Horizontal Scalability - increasing the number of instances
 
-> High Availability - runnging the app in multiple data centers(e.g multi AZ)
+> High Availability - running the app in multiple data centers(e.g multi AZ)
 
 ### Load balancer:
 - Distribute load across multiple instances
 - Allows using single endpoint (DNS) 
-- Does regular health checks on instnces
+- Does regular health checks on instances
 - Handle failure / Terminates unhealthy instances
 - SSL termination (HTTPS)
 - Can enforce stickiness (by using cookies to forward request to same instance)
@@ -148,10 +148,10 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 - Classic Load Balancer(v1) HTTP, HTTPS, TCP
   - has fixed hostname 
 - Application Load Balancer(v2) HTTP, HTTPS, WebSocket
-  - load balancing multiple application on same machine or accross machines
+  - load balancing multiple application on same machine or across machines
   - support for HTTP/2 and WebSocket
-  - allows routin based on path, hostname or query param
-  - great for containerised apps(docker or ECS)
+  - allows routing based on path, hostname or query param
+  - great for containerized apps(docker or ECS)
   - fixed hostname
   - client of the IP is in the header `X-Forwarded-For`
 - Network Load Balancer(v2) TCP, TLS (secure TCP) & UDP
@@ -175,8 +175,8 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 - Clients can use SNI (Server Name Indication) - allows loading multiple SSL certificates onto one web server - works for ALB & NLB but not for CLB(depreciated)
 
 ### Connection Draining
-- Connection Draining(CLB) or DeregistrationDelay(for ALB & NLB)
-- Time to complete request while instance is deregistering
+- Connection Draining(CLB) or de-registration Delay(for ALB & NLB)
+- Time to complete request while instance is de-registering
 - Default 300sec can be set 1-3600(depends on avg request completion time)
 - set 0 to disable
 
@@ -211,7 +211,7 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 ### RDS Backups:
 - Automatically enabled
 - Daily full back up
-- Transacion logs are backed up in every 5 minutes(can restore to any point in time)
+- Transaction logs are backed up in every 5 minutes(can restore to any point in time)
 - 7 days retention(up to 35)
 - Snapshots are manually triggered by user and can keep for unlimited time
 
@@ -222,29 +222,29 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 
 ### RDS Read Replicas
 - Up to 5 read replicas, can be cross AZ/Region
-- Asyncronus replication(takes time to sync up)
-- Can promot to replace master
-- App needs to use different connetcion string to read from replica
-- Usecase: keep production db unaffected by other reads(replicas are read only)
+- Asynchronous replication(takes time to sync up)
+- Can promote to replace master
+- App needs to use different connection string to read from replica
+- Use-case: keep production db unaffected by other reads(replicas are read only)
 - Network Cost applied when data replicated in different AZ
 
 ### RDS Multi AZ
-- Multi AZ is for disater recovery, increases availability 
+- Multi AZ is for disaster recovery, increases availability 
 - Failover in case an AZ is down
 - In this case the second instance is standby / they have one DNS name
 - Not for scaling
 - Multi AZ replication is free
-- To change single AZ to multi AZ is a zero downtime operation, under the hood: a snatphot is taken of the existing DB and and a new DB is restored in a new AZ
+- To change single AZ to multi AZ is a zero downtime operation, under the hood: a snapshot is taken of the existing DB and and a new DB is restored in a new AZ
 
-### RDS Security and encription
-- Both master and replicas can be encripted with AWS KMS(AES-256 encryption)
-- Master must be encripted to replicas be encripted
+### RDS Security and encryption
+- Both master and replicas can be encrypted with AWS KMS(AES-256 encryption)
+- Master must be encrypted to replicas be encrypted
 - Must be enabled at creation
 - Transparent Data Encryption (TDE) available for Oracle and SQL Server
 - For "in flight" encryption (SSL certificates), provide SSL options with trust certificate when connecting to database.
 - To enforce SSL for PostgreSQL, set trough the AWS RDS Console
 - To enforce SSL for MySQL, run query(GRANT USAGE ON *.* TO 'mysqluser'@'%' REQUIRE SSL;)
-- Snapshots are unencrypted if the DB is unencrypted, but can be enabled encryption for snapshots and restore a new db(then migrate the app to use new db and delete old)
+- Snapshots are un-encrypted if the DB is un-encrypted, but can be enabled encryption for snapshots and restore a new db(then migrate the app to use new db and delete old)
 
 ### RDS Network
 - usually deployed within a private subnet
