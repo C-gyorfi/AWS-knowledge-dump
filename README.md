@@ -34,6 +34,13 @@
   - [RDS Security and encryption](#RDS-Security-and-encryption)
   - [RDS Network](#RDS-Network)
   - [RDS Access Management](#RDS-Access-Management)
+- [Amazon Aurora](#Amazon-Aurora)
+  - [Aurora Security](#Aurora-Security)
+- [Amazon ElastiCache](#Amazon-ElastiCache)
+  - [ElastiCache solutions](#ElastiCache-solutions)
+  - [Cache Security](#Cache-Security)
+  - [REDIS VS MEMCACHED](#REDIS-VS-MEMCACHED)
+  - [More about cacheing](#More-about-cacheing)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -254,5 +261,71 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
 - IAM policies can be used to control who can mange the DB
 - Username/Password can be used to login to DB
 - MySQL & PostgreSQL allows IAM authentication for login to the DB(token obtained through IAM & RDS API calls and has lifetime of 15 mins) - this is good because centrally manage users instead of in the DB
+
+# [Back to content](#content)
+
+## Amazon Aurora
+- not open sourced
+- supports Postgres and MySQL
+- around 5x better performance than MySQL on RDS and 3x the performance of Postgres
+- autoscales(per 10GB up to 64TB)
+- can have 15 replicas
+- Highly available wih instant failover
+- 20% more expensive than RDS
+- Can self-heal
+- 6 copies of the data across 3 AZ(4 copies needed for writes and 3 for reads)
+- allows cross region replicas
+
+### Aurora Security
+- similar to RDS(same engine)
+- encryption at rest using KMS
+- backups, snapshots and replicas are encrypted
+- encryption in flight using SSL
+- setting up security groups is users responsibility
+
+## Amazon ElastiCache
+- AWS managed Redis or Memcached
+- in-memory databases (high performance, low latency)
+- reduce load off of DB(read intensive work)
+- helps making application stateless
+- cashing implemented in application source code
+
+### ElastiCache solutions
+- DB Cache
+  - Applications queries ElastiCache, if not available, get from RDS and store in ElastiCache
+  - Cached data must be invalidated(otherwise becomes outdated)
+- User Session Store
+  - User session stored in ElastiCache, therefore can hit any instance 
+
+### Cache Security
+- IAM authentication not supported
+- IAM policies on ElastiCache are only used for AWS API-level security
+- Redis AUTH -> set credentials when creating Redis cluster, which is an extra level of security on top of the security groups. Also supports SSL in flight encryption
+- Memcached -> Supports SASL-based authentication
+
+### REDIS VS MEMCACHED
+| REDIS    | MEMCACHED |
+| :------- | :------- |
+|Multi AZ with Auto-Failover | Sharding (multi-node for partitioning of data) |
+|Read Replicas and high availability | No high availability |
+|Append Only File persistence| Non persistent|
+|Backup and restore|No backup and restore|
+||Multi-threaded architecture|
+
+### More about cacheing
+- Cache eviction can occur in three ways:
+  - deleted explicitly
+  - evicted because the memory is full
+  - set TTL(time-to-live))
+- Lazy Loading / Cache-Aside / Lazy Population (cacheing)
+  - Cache data when requested
+  - Can be slow if data is not yet cashed(3 queries)
+  - Can be bad, stale data(outdated comparing to DB)
+- Write Through (cacheing)
+  - Cache when database is updated
+  - Data in cache is never stale / reads are quick
+  - Expensive(writing twice)
+  - Best to combine with lazy loading(to avoid missing data while DB is updated)
+  - Writing everything into cache may be a wasted effort(never gets used)
 
 # [Back to content](#content)
