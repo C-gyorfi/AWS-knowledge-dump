@@ -41,6 +41,8 @@
   - [Cache Security](#Cache-Security)
   - [REDIS VS MEMCACHED](#REDIS-VS-MEMCACHED)
   - [More about cacheing](#More-about-cacheing)
+- [Route 53](#Route-53)
+  - [Routing Policies](#Routing-Policies)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -327,5 +329,27 @@ good for big data, data Warehouses or cold HDD (sc1) data that is infrequently a
   - Expensive(writing twice)
   - Best to combine with lazy loading(to avoid missing data while DB is updated)
   - Writing everything into cache may be a wasted effort(never gets used)
+
+# [Back to content](#content)
+
+## Route 53
+- Managed Domain Name System(DNS)
+- DNS is a collection of rules and records which helps clients understand how to reach a server through URLs:
+    - A: hostname to IPv4
+    - AAAA: hostname to IPv6
+    - CNAME: hostname to hostname(only for root domain)
+    - Alias: hostname to AWS resource(works for non-root domain)
+- Can use private and public domain names
+- DNS Cache: TTL set when request received
+- Can do health checks and failover
+- Also a `Domain Registrar`: manages the
+reservation of domain names(such as GoDaddy), but third party also can be used
+
+### Routing Policies:
+- Weighted Routing Policy: controls the % of request that go to an endpoint
+- Latency Routing Policy: redirect to a server with the least latency(can be further by geo location)
+- Geo Location Routing Policy: based on users location(should set default policy in case no match for location)
+- Geoproximity Routing Policy: route traffic to resources based on the geographic location of users and resources(can set bias)
+- Multi Value Routing Policy: routing traffic to multiple resources(not a substitute for having an ELB)
 
 # [Back to content](#content)
