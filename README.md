@@ -43,7 +43,7 @@
   - [More about cacheing](#More-about-cacheing)
 - [Route 53](#Route-53)
   - [Routing Policies](#Routing-Policies)
-- [VPC fundamentals][#VPC-fundamentals]
+- [VPC fundamentals](#VPC-fundamentals)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
