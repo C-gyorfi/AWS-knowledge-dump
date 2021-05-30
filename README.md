@@ -43,6 +43,7 @@
   - [More about cacheing](#More-about-cacheing)
 - [Route 53](#Route-53)
   - [Routing Policies](#Routing-Policies)
+- [VPC fundamentals][#VPC-fundamentals]
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -351,5 +352,21 @@ reservation of domain names(such as GoDaddy), but third party also can be used
 - Geo Location Routing Policy: based on users location(should set default policy in case no match for location)
 - Geoproximity Routing Policy: route traffic to resources based on the geographic location of users and resources(can set bias)
 - Multi Value Routing Policy: routing traffic to multiple resources(not a substitute for having an ELB)
+
+# [Back to content](#content)
+
+## VPC fundamentals
+- Virtual Private Cloud(VPC)
+- Subnets: Tied to an AZ, network partition of a VPC
+- Internet Gateway: at the VPC level, provide Internet Access
+- NAT Gateway(AWS managed) / NAT Instances(self managed): give internet access to private subnets while remaining private
+- NACL: Firewall which controls traffic from and to
+subnet, stateless, subnet rules for inbound and outbound
+- Security Groups: Firewall that controls traffic to and from an instance(e.g EC2), stateful, operate at the EC2 instance level or ENI
+- VPC Peering: Connect two VPC with non overlapping IP ranges, non transitive(all VPC needs explicit peering to connect)
+- VPC Endpoints: Provide private access to AWS Services within VPC(enhanced security and low latency)
+- VPC Flow Logs: network traffic logs
+- Site to Site VPN: VPN over public internet between on-premises DC and AWS 
+- Direct Connect: (physical)direct private connection to a AWS
 
 # [Back to content](#content)
