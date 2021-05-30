@@ -44,6 +44,11 @@
 - [Route 53](#Route-53)
   - [Routing Policies](#Routing-Policies)
 - [VPC fundamentals](#VPC-fundamentals)
+- [S3](#S3)
+  - [Versioning](#Versioning)
+  - [Encryption](#Encryption)
+  - [Security](#Security)
+  - [CORS](#CORS)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -368,5 +373,50 @@ subnet, stateless, subnet rules for inbound and outbound
 - VPC Flow Logs: network traffic logs
 - Site to Site VPN: VPN over public internet between on-premises DC and AWS 
 - Direct Connect: (physical)direct private connection to a AWS
+
+# [Back to content](#content)
+
+## S3
+- ”infinitely scaling” storage
+- stores object in "buckets
+- each bucket has to have a globally unique name, but they defined at region level
+- Objects are files, the key to an object is the path (e.g s3://some-bucket/`this/is/thepath.txt`)
+- max object size is 5TB, however max upload size is 5GB, but can use "multi-part upload"
+- can have Metadata(system or user metadata), Tags(useful for security / lifecycle), Version ID (if versioning is enabled)
+- can be used for static website hosting(public reads needs to ALLOW)
+
+### Versioning
+- enabled at the bucket level
+- when key is overwritten will increment the version
+- best practice to enable versioning(can roll back, protect against unintended deletes)
+- file that is not versioned prior to enabling versioning will have version “null”
+- suspending versioning does not delete the previous versions
+- deleting versioned item adds delete marker(but keeps the file until they are permanently deleted)
+
+### Encryption
+- Methods of encrypting objects:
+  - SSE-S3: encrypts S3 objects using keys handled & managed by AWS(server side encryption), using AES-256 encryption, by using the header `"x-amz-server-side-encryption": "AES256"`
+  - SSE-KMS: leverage AWS Key Management Service to manage encryption keys, good because user control and audit trail(also server side encryption), set `"x-amz-server-side-encryption": ”aws:kms"`
+  - SSE-C: server-side encryption, keys managed and provided by customer, Amazon S3 does not store the key, must use HTTPS because key provided in request header.
+  - Client Side Encryption: encryption happens client side using client library(e.g Amazon S3 Encryption Client), encrypted data sent to S3, decrypted client-side when retrieved from S3
+- Encryption in transit (SSL/TLS):
+  - S3 exposes HTTP endpoint(non encrypted) and HTTPS endpoint (encryption in flight)
+  - HTTPS is mandatory for SSE-C but recommended in every case(most client would use the HTTPS endpoint by default)
+
+### Security
+- User based: IAM policies 
+- Resource Based: Bucket Policies(bucket wide rules) / Object Access Control List / Bucket Access Control List
+- IAM principal can access an S3 object if IAM permission or resource policy ALLOWS and there’s no explicit DENY
+- Block Public Access if the bucket should never be public
+- S3 supports VPC endpoints
+- Can log access(stored in another S3) or API calls can be logged via CloudTrail
+- Can set MFA to delete
+- Pre-signed URLs valid for limited time 
+
+### CORS
+- CORS means Cross-Origin Resource Sharing
+- allow requests to other origins while visiting the main origin
+- if the origins are are different, the requests won’t be fulfilled unless the other origin allows for the requests, using CORS Headers (ex: Access-Control-Allow-Origin)
+- if a client does a cross-origin request on an S3 bucket, CORS headers needs to enabled to allow the request(can allow a specific origin or all using wildcard)
 
 # [Back to content](#content)
