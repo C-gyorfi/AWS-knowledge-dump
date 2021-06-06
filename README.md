@@ -8,12 +8,10 @@
   - [Access](#access)
   - [More about IAM](#more-about-iam)
   - [Responsibilities](#responsibilities)
-
 - [EC2](#ec2)
   - [EC2 Instance types](#ec2-instance-types)
   - [Security Groups](#security-groups)
   - [Purchasing Options](#purchasing-options)
-
 - [EC2 Instance Storage](#ec2-instance-storage)
   - [EBS Volume Types and Use cases](#EBS-Volume-Types-and-Use-cases)
   - [EBS Multi-Attach](#EBS-Multi-Attach)
@@ -49,6 +47,17 @@
   - [Encryption](#Encryption)
   - [Security](#Security)
   - [CORS](#CORS)
+  - [MFA Delete](#MFA-Delete)
+  - [S3 Access Logs](#S3-Access-Logs)
+  - [S3 Replication](#S3-Replication)
+  - [S3 Pre-Signed URLs](#S3-Pre-Signed-URLs)
+  - [S3 Storage Classes](#S3-Storage-Classes)
+  - [S3 Lifecycle Rules](#S3-Lifecycle-Rules)
+  - [S3 Performance](#S3-Performance)
+  - [S3 Select and Glacier Select](#S3-Select-and-Glacier-Select)
+  - [S3 Event Notifications](#S3-Event-Notifications)
+  - [Locks](#Locks)
+- [AWS Athena](#AWS-Athena)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -418,5 +427,117 @@ subnet, stateless, subnet rules for inbound and outbound
 - allow requests to other origins while visiting the main origin
 - if the origins are are different, the requests won’t be fulfilled unless the other origin allows for the requests, using CORS Headers (ex: Access-Control-Allow-Origin)
 - if a client does a cross-origin request on an S3 bucket, CORS headers needs to enabled to allow the request(can allow a specific origin or all using wildcard)
+
+### MFA Delete
+- to use MFA-Delete, versioning must be enabled on the S3 bucket
+- you will need MFA to permanently delete an object version or suspend versioning on the bucket
+- you won't need MFA to list deleted versions or enabling versioning
+- root account can enable MFA Delete and only trough the CLI
+
+### S3 Access Logs
+- For audit purpose
+- any request made to S3, from any account will be logged into another S3 bucket
+- logging bucket must be a different bucket otherwise it creates and infinite loop
+
+### S3 Replication
+- Must enable versioning on both source and destination
+- Cross Region Replication (CRR) - potential use-cases: compliance, lower latency access, replication across accounts
+- Same Region Replication (SRR) - potential use-cases: log aggregation, live replication between production and test accounts
+- Can replicate in different account
+- asynchronous process
+- when activating new objects are replicated
+- delete markers not replicated
+
+### S3 Pre-Signed URLs
+- generate using CLI or SDK
+- inherit the permissions of the person who generated
+
+### S3 Storage Classes
+- Amazon S3 Standard - General Purpose
+  - High durability / Multi AZ
+  - 99.99% Availability
+  - Sustain 2 concurrent facility failures
+  - Use-Cases: Data analytics, content distribution
+- Amazon S3 Standard-Infrequent Access (IA) 
+  - For less frequently accessed data, but rapid access when needed
+  - High durability / Multi AZ
+  - High Availability
+  - Lower cost than standard
+  - Use-Cases: disaster recover, backups
+- Amazon S3 One Zone-Infrequent Access
+  - data is stored in a single AZ
+  - High durability, data lost when AZ is destroyed
+  - 99.5% Availability
+  - Lower cost than IA
+  - Use-Cases: Storing backup of on-prem data or storing data that can be recreated
+- Amazon S3 Intelligent Tiering
+  - low latency and high throughput performance of S3 Standard
+  - small monthly monitoring and auto-tiering fee
+  - move objects between tiers based on changing usage patters
+  - multi AZ 
+- Amazon Glacier
+  - low cost storage for archiving
+  - for long term data storage
+  - cost $0.004 / GB per month + retrieval cost
+  - items called `Archive` in `Vaults`
+  - retrieval options: 
+    - Expedited (1 to 5 minutes)
+    - Standard (3 to 5 hours)
+    - Bulk (5 to 12 hours)
+  - Minimum storage duration of 90 days
+- Amazon Glacier Deep Archive
+  - retrieval options: 
+    - Standard (12 hours) 
+    - Bulk (48 hours)
+  - Minimum storage duration of 180 days
+
+### S3 Lifecycle Rules
+- Transition actions: To move objects to another storage class after a given time
+- Expiration actions: To delete after some time
+
+### S3 Performance
+- Auto-scales to hight request rates (latency 100-200 ms)
+- can achieve at least 3,500 request per prefix("`/example/of/prefix/`file")
+- can achieve 22,000 requests per second across prefixes
+- when using SSE-KMS, KMS limitation may impact this performance
+- Multi-Part upload: 
+  - must use for files greater than 5GB
+  - parallelize uploads(faster)
+- S3 Transfer Acceleration:
+  - to increase transfer speed: `S3` ->>> `AWS edge location` ->>> `S3 bucket in the target region`
+  - can be used along multi-part upload
+- S3 Byte-Range Fetches:
+  - parallelize GETs request by requesting specific byte ranges
+  - resilience in case of failures
+  - speed up downloads
+  - can retrieve part of a file
+
+### S3 Select and Glacier Select
+- Using SQL for server side filtering
+- filter by rows & columns
+- less network transfer, less CPU cost client-side
+
+### S3 Event Notifications
+- S3 operations can trigger SNS, SQS and Lambda events
+- Object name filtering possible
+- Versioned buckets can be more accurate(otherwise 2 writes in the same time may trigger 1 event)
+
+### Locks
+- S3 Object Lock
+  - Block an object version deletion for a specified amount of time
+  - for Write Once Read Many(WORM) model
+- Glacier Vault Lock
+  - WORM model
+  - Lock the policy for future edits
+  - For compliance and data retention
+
+# [Back to content](#content)
+
+## AWS Athena
+- Serverless service to perform analytics directly against S3 files
+- Uses SQL language to query the files
+- Charge per query(amount of data scanned)
+- Use-cases: Business intelligence / analytics / reporting / CloudTrail trails
+- Allows analyzing data directly on S3 
 
 # [Back to content](#content)
