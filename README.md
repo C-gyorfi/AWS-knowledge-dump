@@ -58,6 +58,10 @@
   - [S3 Event Notifications](#S3-Event-Notifications)
   - [Locks](#Locks)
 - [AWS Athena](#AWS-Athena)
+- [CloudFront](#CloudFront)
+  - [CloudFront VS S3 Cross Region Replication](#CloudFront-VS-S3-Cross-Region-Replication)
+  - [CF Signed URL VS S3 Pre-Signed URL](#CF-Signed-URL-VS-S3-Pre-Signed-URL)
+- [ECS](#ECS)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -541,3 +545,55 @@ subnet, stateless, subnet rules for inbound and outbound
 - Allows analyzing data directly on S3 
 
 # [Back to content](#content)
+
+## CloudFront
+- Content Delivery Network(CDN)
+- Cached content at edge locations to improve read performance
+- Can expose external HTTPS or talk to internal HTTPS
+- Web application firewall and DDos protection
+- Origins:
+  - S3 (distributing files, enhanced security Origin Access Identity, CF can be used to upload files to S3(as an ingress))
+  - HTTP: ABL / EC2 instance / S3 website / or any HTTP service
+- Geo Restriction(restrict access by geo location):
+  - Whitelist: allow countries (by 3rd party Geo-IP database)
+  - Blacklist: ban countries (by 3rd party Geo-IP database)
+- Caching:
+  - at each CloudFront Edge Location
+  - ideally maximise the cache hit rate / minimise origin requests
+  - TTL (0 seconds to 1 year) - set by origin (`Cache-Control` / `Expires` headers)
+  - invalidate using `CreateInvalidation API`
+  - separating static and dynamic distributions can maximise cache hits 
+- HTTPS protocol policies: 
+- [Client]<=`viewer protocol policy`=>[EdgeLocation]<=`origin protocol policy`=>[Origin]
+  - Viewer Protocol Policy:
+    - HTTP redirected to HTTPS / or HTTPS only
+  - Origin Protocol Policy
+    - HTTPS only 
+    - or match HTTP => HTTP & HTTPS => HTTPS
+    - s3 served websites doesn't support HTTPS
+- Signed URL and Signed Cookies
+  - Control the time frame of URL validity
+  - Signed URL to allow access individual files
+  - Signed Cookies to allow access multiple files 
+
+## CloudFront VS S3 Cross Region Replication
+| CloudFront | S3 Cross Region Replication |
+| :------- | :------- |
+|Global Edge network | Need setup for each region |
+|Objects cached for a TTL | Updated in near real-time |
+|good for static content| Read only |
+||dynamic content / low latency(ideal for content for a few regions)|
+
+## CF Signed URL VS S3 Pre-Signed URL
+| CloudFront Signed URL | S3 Pre-Signed URL |
+| :------- | :------- |
+|Allow access to a path, no matter the origin | Inherit permission of the person who pre-signed the URL |
+|Account wide key-pair(only root can manage) | Uses the IAM key of the signing IAM principal |
+|Can filter by IP, path, date, expiration | Limited lifetime |
+|Can leverage caching features ||
+
+# [Back to content](#content)
+
+<!-- ## ECS
+
+# [Back to content](#content) -->
