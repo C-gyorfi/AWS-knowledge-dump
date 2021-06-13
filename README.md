@@ -62,6 +62,16 @@
   - [CloudFront VS S3 Cross Region Replication](#CloudFront-VS-S3-Cross-Region-Replication)
   - [CF Signed URL VS S3 Pre-Signed URL](#CF-Signed-URL-VS-S3-Pre-Signed-URL)
 - [ECS](#ECS)
+  - [ECS Clusters](#ECS-Clusters)
+  - [Task Definitions](#Task-Definitions)
+  - [ECS Service](#ECS-Service)
+  - [ECR](#ECR)
+  - [Fargate](#Fargate)
+  - [IAM Roles](#IAM-Roles)
+  - [Tasks Placemen](#Tasks-Placemen)
+  - [Service Auto Scaling](#Service-Auto-Scaling)
+  - [Cluster Capacity Provider](#Cluster-Capacity-Provider)
+  - [ECS Data Volumes](#ECS-Data-Volumes)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -594,6 +604,99 @@ subnet, stateless, subnet rules for inbound and outbound
 
 # [Back to content](#content)
 
-<!-- ## ECS
+## ECS
+- Elastic Container Service
+- To run containerized applications(e.g docker) 
+- Docker Containers Management platforms:
+  - ECS
+  - Fargate (serverless)
+  - EKS (AWS managed Kubernetes)
 
-# [Back to content](#content) -->
+### ECS Clusters
+- logical grouping of EC2s
+- EC2 instances running ECS agent (Docker container)
+- ECS agent registers instance to cluster
+
+### Task Definitions
+- JSON with config how to run a docker container
+  - Port Binding for Container and Host
+  - Memory and CPU requirement
+  - Env vars
+  - Networking info
+  - IAM Role
+  - Logging
+
+### ECS Service
+- define how many tasks should run and how
+- ensure task are running as desired
+- can be linked to load-balancer(ELB/NLB/ALB)
+- ALB allow dynamic port mapping
+
+### ECR
+- ECR is for hosting private images
+- IAM to control access
+
+### Fargate
+- Serverless - no need to provision EC2 instances
+- just create task definitions - AWS will run the docker containers
+- scale -> increase task numbers
+
+### IAM Roles
+| EC2 Instance Profile | ECSTask Role |
+| :------- | :------- |
+|Used by ECS agent | Allow tasks to have their specific role |
+|Makes API calls to ECS service | Use different roles for different ECS Services |
+|Send container logs to CloudWatch| Defined in the task definition |
+|Pull image from ECR||
+
+### Tasks Placemen
+- Only applies to ECS with EC2(not for Fargate)
+- To decide where to place new tasks based on CPU, memory, and available port
+- Or to determine which task to terminate
+- Defined in `task placement strategy` and `task placement constraints` 
+- Process of placing new tasks:
+  - 1. Find instances that satisfy requirements(CPU, memory, port)
+  - 2. Identify instances that meet `task placement constraints`
+  - 3. Identify instances that meet `task placement strategy`
+  - 4. Select the instance
+- Task Placement Strategies:
+  - **Binpack**: cost saving, minimises the number of instances in use by placing tasks based on least available amount of resources(*CPU/memory*)
+  - **Random**: place randomly
+  - **Spread**: Distribute tasks evenly (based on specified value, e.g: `availability-zone`)
+  - !Can mix strategies(e.g **spread** by availability zone by **binpack** memory)
+- Task Placement Constraints:
+  - `distinctInstance`: each tasks on different container
+  - `memberOf`: place task on container that satisfies the expression:
+
+    ```node
+    "placementConstraints": [
+      {
+        "expression": "attribute.ecs.instance-type == g2.*",
+        "type": "memberOf"
+      }
+    ]
+    ```
+
+### Service Auto Scaling
+- CPU / RAM monitored by CloudWatch at ECS service level
+- Types:
+  - **Target Tracking**: based on a specific CloudWatch metric
+  - **Step Scaling**: based on CloudWatch alarms
+  - **Scheduled Scaling**: based on predictable changes
+- Service Auto Scaling(task level) is NOT THE SAME as EC2 Auto Scaling (instance level)
+
+### Cluster Capacity Provider
+- To determine the infrastructure the task is running on
+- For `Fargate` -> FARGATE and FARGATE_SPOT capacity providers added automatically
+- For `EC2` -> need to associate the capacity provider with an auto-scaling group
+
+### ECS Data Volumes
+- EBS volume is mounted onto the EC2, but task moved from one EC2 instance to another, won't be able to access the same volume
+- EFS File Systems 
+  - works for both EC2 Tasks and Fargate tasks
+  - Use-case: persistent multi-AZ shared storage for containers
+- Bind Mounts Sharing data between containers
+  - works for both EC2 Tasks and Fargate tasks
+  - to share an ephemeral storage between containers
+
+# [Back to content](#content)
