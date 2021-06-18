@@ -72,6 +72,8 @@
   - [Service Auto Scaling](#Service-Auto-Scaling)
   - [Cluster Capacity Provider](#Cluster-Capacity-Provider)
   - [ECS Data Volumes](#ECS-Data-Volumes)
+- [Elastic Beanstalk](#Elastic-Beanstalk)
+  - [Beanstalk Deployment Options](#Beanstalk-Deployment-Options)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -698,5 +700,66 @@ subnet, stateless, subnet rules for inbound and outbound
 - Bind Mounts Sharing data between containers
   - works for both EC2 Tasks and Fargate tasks
   - to share an ephemeral storage between containers
+
+# [Back to content](#content)
+
+## Elastic Beanstalk
+- AWS's PaaS solution using EC2, ASG, ELB, RDS, etc. under the hood
+- application code is the responsibility of the dev
+- uses Cloud Formation under the hood
+- architecture models:
+  - Single Instance
+  - LB + ASG (good for pre-prod and prod)
+  - ASG only(good for non-web apps in prod such as workers)
+- Elastic Beanstalk components: Application, Application version, Environment
+- Supports many language, but you can write your custom platform or just run Docker
+- Has its own CLI: `EB cli` 
+- Deployment process: 
+  - Describe dependencies
+  - Zip code 
+  - Create new app version
+  - EB will do the rest(deploy the app to EC2s and run the app)
+- Lifecycle Policy: max 1000 application versions, but can set to remove unused old versions by time or space
+- Extensions: 
+  - define in root folder in .ebextensions/ 
+  - YAML / JSON format
+  - .config extensions (example: logging.config)
+  - can add AWS resources such as RDS, ElastiCache, DynamoDB(deleted when environment deleted)
+- Elastic Beanstalk Cloning: new env with with the same config
+- Migration / Change load balancer type:
+  - create new env with same config(not cloning)
+  - deploy app
+  - perform CNAME swap or Route 53 update
+- RDS can be provisioned with Beanstalk which is good for dev/test but not for prod because the lifecycle of the RDS is tied to Beanstalk env
+- Migration / Decouple RDS: 
+  - create snapshot(for safety)
+  - disable deletion on RDS console
+  - create new Beanstalk app and point to existing RDS
+  - perform CNAME swap or Route 53 update
+  - terminate the old env
+  - delete the `DELETE_FAILED` CloudFormation stack
+- Single Docker: does not use ECS, runs the provided docker container:
+  - `Dockerfile`: will build and run
+  - `Dockerrun.aws.json` (v1): describe where *already built* image is
+- Multi Docker Container:
+  - multiple containers per EC2 instance
+  - creates ECS Cluster, EC2 instances, Load Balancer (in high availability mode), task definition and execution
+  - `Dockerrun.aws.json` required in root to generate the ECS task definition
+  - Image must be build and stored(e.g ECR)
+- HTTPS: Load the SSL certificate onto LB using console or `.ebextensions/securelistener-alb.config` 
+  - SSL Certificate provisioned using AWS Certificate Manager or CLI
+  - Must have security group rule to allow incoming port 443
+- Worker Environment: allows decoupling application into two tiers, offload tasks from web server(can use a `cron.yaml`)
+- Custom Platform: allows defining OS, additional software, scripts that beanstalk runs
+  - Custom Image: modified existing Beanstalk Platform
+  - Custom Platform: new Beanstalk Platform
+
+### Beanstalk Deployment Options
+- `All at once` - fastest but there is downtime
+- `Rolling` - update a few instances and move on once the instance is healthy
+- `Rolling with additional batches` - besides rolling, spins up additional instances(small extra cost)
+- `Immutable` - new instances in a new ASG, deploys version and then swaps all the instances
+- `Blue / Green` - not a direct feature! Create a new stage env with the new version, Route 53 to redirect fraction of the traffic to new version. Easy to roll back. Use Beanstalk, “swap URLs” to complete deployment.
+- `Traffic Splitting` - good for canary testing. Small fraction of traffic is sent to a temporary ASG. Health is monitored and automatically rolls back in case of failure. Zero downtime. New instances are migrated from the temporary to the original ASG and old app versions terminated.
 
 # [Back to content](#content)
