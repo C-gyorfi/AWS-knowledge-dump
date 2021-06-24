@@ -74,6 +74,12 @@
   - [ECS Data Volumes](#ECS-Data-Volumes)
 - [Elastic Beanstalk](#Elastic-Beanstalk)
   - [Beanstalk Deployment Options](#Beanstalk-Deployment-Options)
+- [CICD](#CICD)
+  - [CodeCommit](#CodeCommit)
+  - [CodePipeline](#CodePipeline)
+  - [CodeBuild](#CodeBuild)
+  - [CodeDeploy](#CodeDeploy)
+  - [CodeStar](#CodeStar)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -761,5 +767,81 @@ subnet, stateless, subnet rules for inbound and outbound
 - `Immutable` - new instances in a new ASG, deploys version and then swaps all the instances
 - `Blue / Green` - not a direct feature! Create a new stage env with the new version, Route 53 to redirect fraction of the traffic to new version. Easy to roll back. Use Beanstalk, “swap URLs” to complete deployment.
 - `Traffic Splitting` - good for canary testing. Small fraction of traffic is sent to a temporary ASG. Health is monitored and automatically rolls back in case of failure. Zero downtime. New instances are migrated from the temporary to the original ASG and old app versions terminated.
+
+# [Back to content](#content)
+
+## CICD
+
+### **CodeCommit**: 
+  - AWS version control offer(GIT), scale seamlessly, private, integrated with CI tools e.g CodeBuild or Jenkins
+  - Authentication: HTTPS / SSH / MFA
+  - Authorization: can use IAM Policies to manage user / roles rights to repositories
+  - repos are encrypted at rest using KMS
+  - both GitHub and CodeCommit can integrate with CodeBuild
+  - can trigger AWS SNS (Simple Notification Service) or AWS Lambda or AWS CloudWatch Event Rules
+
+
+### **CodePipeline**:
+  - Continuous delivery
+  - Source can be GitHub / CodeCommit / Amazon S3
+  - Build: CodeBuild / Jenkins / etc
+  - Load testing(3rd party tools)
+  - Deploy: AWS CodeDeploy / Beanstalk / CloudFormation / ECS
+  - Stages can have both sequential actions and parallel actions
+  - Whats a stage? Build / Test / Deploy / Load Test / etc
+  - Can set manual approval at any stage(e.g deploy to prod)
+  - Artifacts stored in S3(passed to next stage from there)
+  - State changes happen in AWS CloudWatch Events, can create SNS notifications(e.g failed pipeline)
+  - CloudTrail can be used to audit AWS API calls
+  - Pipeline need the right permissions(IAM Service Role) attached to perform certain actions
+
+### **CodeBuild**
+  - Managed build service(similar to Jenkins)
+  - Continuous scaling(no provision required)
+  - Pay per usage(build time)
+  - Leverages Docker
+  - Integrates with KMS for encryption of build artifacts
+  - Build instructions in `buildspec.yml`
+  - Logs to Amazon S3 & AWS CloudWatch Logs
+  - CloudWatch Events(e.g detect failed builds and trigger notifications)
+  - CloudWatch Alarms(to notify if “thresholds” for failures needed)
+  - SNS notifications
+  - Can reproduce CodeBuild locally to troubleshoot
+  - Builds can be defined in `CodePipeline` or `CodeBuild`
+  - SSM Parameter store can be used to store secrets
+  - Phases: `Install` // `Pre build` // `Build` // `Post build`
+  - Artifacts: uploaded into S3 (KMS encrypted)
+  - Cache: Files to cache into S3 (future build speedup)
+  - By default CodeBuild launches outside of the deployed VPC, can set VPC config so it can access resources(e.g integration tests etc.)
+
+### **CodeDeploy**
+  - Managed deployment service(Elastic Beanstalk also uses under the hood)
+  - How?
+    - EC2 or on-prem must run CodeDeploy Agent
+    - Agent is calling CodeDeploy to get next work
+    - CodeDeploy sends `appspec.yml`
+    - App pulled from GitHub or S3
+    - Instance runs deployment instructions
+    - CodeDeploy Agent reports: success or failure
+  - Instances grouped by deployment env(dev / test / prod)
+  - Can be chained into CodePipeline to use artifacts from there
+  - Blue / Green only works with EC2(not on prem)
+  - Support deployment of AWS Lambda
+  - Does not provision resources
+  - AppSpec:
+    - How to source and copy from S3 / GitHub to filesystem
+    - Hooks: instructions to deploy new version
+      - ApplicationStop
+      - DownloadBundle
+      - BeforeInstall
+      - AfterInstall
+      - ApplicationStart
+      - ValidateService
+
+### **CodeStar**
+  - Integrated solution(GitHub/CodeCommit, CodeBuild, CodeDeploy, CloudFormation, CodePipeline, CloudWatch)
+  - Issue tracking integration with: JIRA / GitHub Issues
+  - Dashboard to view all components
+  - Pay only for the underlying services
 
 # [Back to content](#content)
