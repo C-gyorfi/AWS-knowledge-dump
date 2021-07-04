@@ -80,6 +80,9 @@
   - [CodeBuild](#CodeBuild)
   - [CodeDeploy](#CodeDeploy)
   - [CodeStar](#CodeStar)
+- [CloudFormation](#CloudFormation)
+  - [CF template](#CF-template)
+  - [Updating stacks](#Updating-stacks)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -843,5 +846,47 @@ subnet, stateless, subnet rules for inbound and outbound
   - Issue tracking integration with: JIRA / GitHub Issues
   - Dashboard to view all components
   - Pay only for the underlying services
+
+# [Back to content](#content)
+
+## CloudFormation
+- Infrastructure as Code
+- Cost effectiveness: 
+  - Can estimate cost of the resources using CloudFormation template
+  - Can destroy resources when not in use
+- Templates has to be uploaded into S3 and referenced in CF
+- To update, need to upload new version(cannot edit existing version in bucket)
+- Stacks identified by name
+- Deleting stack deletes all referenced artifact 
+- How to edit? CloudFormation Designer on console or edit the YAML and deploy using AWS CLI
+
+### CF template
+- Components:
+  - Resources (mandatory)
+    - Can reference each other
+    - Every resource has to declared cannot use dynamic generation
+  - Parameters (dynamic inputs)
+    - Reference a Parameter: use `Fn::Ref` or short in YML `!Ref`
+  - Mappings (static variables)
+    - Fixed variables within CF Template
+    - Values are hardcoded within the template
+    - User `Fn::FindInMap` to return value for given key, e.g `!FindInMap [ MapName, TopLevelKey, SecondLevelKey ]`
+  - Outputs (references to created resources)
+    - optional values, can be imported into other stacks
+    - can’t delete a CF Stack if its outputs are referenced by another stack(using `!ImportValue`)
+  - Conditionals (conditions to perform resource creation)
+    - Logical conditions such as `Fn::Equals`, `Fn::Not` , `Fn::If` etc..
+  - Metadata
+- Helpers: References and Functions
+
+### Updating stacks
+- When stack creating fails everything rolls back by default(gets deleted)
+- There is option to disable rollback
+- When update fails, the stack rolls back to previous working state(see logs for errors)
+- `ChangeSets` tells you the changes before applying, but it won't tell if the update will be successful 
+- `Nested stacks` allows reusing repeated patterns or common components from other stacks(best practice)
+- `Cross Stacks` reference export values in other stacks
+- `StackSets` manage changes across multiple accounts/regions with a single operation
+- `CloudFormation drift` protect against manual changes after an infrastructure has been deployed
 
 # [Back to content](#content)
