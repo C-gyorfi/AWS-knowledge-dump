@@ -83,6 +83,11 @@
 - [CloudFormation](#CloudFormation)
   - [CF template](#CF-template)
   - [Updating stacks](#Updating-stacks)
+- [CloudWatch](#CloudWatch)
+  - [Metics](#Metrics)
+  - [Logs](#Logs)
+  - [Events](#Events)
+  - [Alarms](#Alarms)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -888,5 +893,63 @@ subnet, stateless, subnet rules for inbound and outbound
 - `Cross Stacks` reference export values in other stacks
 - `StackSets` manage changes across multiple accounts/regions with a single operation
 - `CloudFormation drift` protect against manual changes after an infrastructure has been deployed
+
+# [Back to content](#content)
+
+## CloudWatch
+### **Metrics** 
+- Analyse key metrics
+- Metric is variable of a resource to monitor(e.g `CPUUtilization`). Belongs to `Namespaces` and have timestamps
+- Dimension is an attribute of a metric(e.g `instance id`)
+- EC2 instance tracks metrics for every 5 minutes by default(up to 1 minutes with detailed monitoring => extra cost)
+- Free Tier allows 10 detailed monitoring metrics
+- EC2 Memory usage not pushed by default(enable using custom metric)
+- Custom Metrics:
+  - To segment metrics, use dimensions(e.g `Instance.id`)
+  - Metric resolution: `Standard` => 60 sec, `High Resolution` => 1 sec for extra cost
+  - Use the `PutMetricData` to send custom metrics
+  - throttle errors -> exponential back off 
+
+### **Logs** 
+- Collect log files
+- Send logs using SDK
+- Can batch export to archive into S3
+- Can stream to ElasticSearch for analytics
+- `Log groups` - represents an application
+- `Log stream` - instances within application or containers
+- Expiration policies to define how long can a log live
+- IAM permissions needs to allow to send logs to CW
+- Can encrypt using KMS
+- **EC2 logs**:
+  - Must run cloudWatch agent(can set on premises too!)
+  - Must have the IAM permissions
+  - Agents:
+    - `CloudWatch Logs Agent`(old version to send logs to CW)
+    - `CloudWatch Unified Agent` (can do other things e.g system-level metrics -> RAM/CPU), config using SSM Parameter Store
+- When filter applied only the filtered data sent to CW
+
+### **Events** 
+- Notifications when events happen
+- `Schedule` using CRON
+- `Event Pattern` react to a service change(e.g CodePipeline)
+- Can trigger Lambda, SQS/SNS/Kinesis Messages
+- Creates a JSON with the info about the change 
+- **EventBridge** -> new CloudWatch Events(built on top of CW Events)
+  - Default event bus(AWS generated)
+  - Partner event bus(to receive event from 3rd party e.g `DataDog`)
+  - Custom Event buses(for own app)
+  - Event buses can be accesses by other AWS accounts
+  - `Schema Registry`: generates code based on the data structured in the event bus
+
+### **Alarms** 
+- React to metrics or events
+- Triggers notifications for a metric(e.g ASG, EC2 Actions, SNS)
+- States can be:
+  - ||`OK` ||
+  - || `INSUFFICIENT_DATA` || 
+  - ||`ALARM`||
+- Period:
+  - Time window to evaluate the metric(in seconds)
+  - High resolution: 10 sec or 30 sec
 
 # [Back to content](#content)
