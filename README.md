@@ -88,6 +88,7 @@
   - [Logs](#Logs)
   - [Events](#Events)
   - [Alarms](#Alarms)
+- [X-Ray](#X-Ray)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -952,4 +953,29 @@ subnet, stateless, subnet rules for inbound and outbound
   - Time window to evaluate the metric(in seconds)
   - High resolution: 10 sec or 30 sec
 
+# [Back to content](#content)
+
+## X-Ray
+- Visual analysis of cloud applications
+- Troubleshooting performance
+- Visualize components in a microservice architecture
+- Can be used with AWS Lambda, Elastic Beanstalk, ECS, ELB, API Gateway, EC2(or even on prem)
+- Allows tracing requests(every or % of requests)
+- IAM for authorization
+- Encryption at rest -> KMS
+- Enabled using SDK and X-ray daemon/enable X-Ray AWS Integration(AWS Lambda running it already)
+- Each app must have the IAM rights to write to X-Ray
+- Service map computed(using segments and traces)
+- **Sampling Rules** - controls the amount of data sent to X-ray(default records first request each second, and five percent of any additional requests)
+- APIs: 
+  - Write: `PutTraceSegments`, `PutTelemetryRecords`, `GetSamplingRules`, `GetSamplingTargets`, `GetSamplingStatisticSummaries`
+  - Read: `GetServiceGraph`, `BatchGetTraces`, `GetTraceSummaries`, `GetTraceGraph`
+  - X-Ray daemon needs to have an IAM for the above API calls
+- Config on Elastic Beanstalk using `.ebextensions/xray-daemon.config` 
+  - instance profile needs to have the correct IAM permissions
+  - application code with the X-Ray SDK
+  - **X-Ray daemon is not provided for Multicontainer Docker**
+- In ECS cluster can enabled using X-Ray Daemon Container or using "Sidecar" on the app container
+- Fargate cluster "Sidecar" on the app container in the Fargate task
+ 
 # [Back to content](#content)
