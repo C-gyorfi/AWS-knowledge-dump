@@ -89,6 +89,7 @@
   - [Events](#Events)
   - [Alarms](#Alarms)
 - [X-Ray](#X-Ray)
+- [CloudTrail](#CloudTrail)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -978,4 +979,27 @@ subnet, stateless, subnet rules for inbound and outbound
 - In ECS cluster can enabled using X-Ray Daemon Container or using "Sidecar" on the app container
 - Fargate cluster "Sidecar" on the app container in the Fargate task
  
+# [Back to content](#content)
+
+## CloudTrail
+- Governance, compliance and audit for AWS Account
+- Default enabled 
+- events and API calls made within an AWS Account(using Console/SDK/CLI)
+- Can put logs into CW or S3
+- CloudTrail can help investigating deleted resources
+- CloudTrail Events:
+  - **Management Events:**
+    - performed on resources e.g `AttachRolePolicy`, `CreateSubnet`
+    - logged by default
+    - can separate Read/Write events
+  - **Data Events:**
+    - Not logged by default
+    - Object level. e.g `GetObject`(Read event) `DeleteObject` (Write event)
+    - Lambda function execution is a data event
+  - **Insights Events:**
+    - Enable to detect unusual activity
+    - Baseline created by analyzing normal management events 
+    - Sent to S3 and EventBridge
+- Events stored for 90 days(for longer -> log into S3 and use Athena)
+
 # [Back to content](#content)
