@@ -90,6 +90,7 @@
   - [Alarms](#Alarms)
 - [X-Ray](#X-Ray)
 - [CloudTrail](#CloudTrail)
+- [SQS](#SQS)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1002,4 +1003,64 @@ subnet, stateless, subnet rules for inbound and outbound
     - Sent to S3 and EventBridge
 - Events stored for 90 days(for longer -> log into S3 and use Athena)
 
+# [Back to content](#content)
+
+## SQS
+- Managed service, queue model
+- Unlimited throughput / unlimited messages in queue
+- Default retention 4 days(maxi of 14 days)
+- Low latency (10ms)
+- 256KB message size limit
+- Best effort ordering messages(can be out of order)
+- Can have duplicate
+- Sending:
+  - Use the `SendMessage` API (SDK) to produce a message
+  - persisted until a consumer deletes / retention period
+- Consuming:
+  - Poll SQS for messages(up to 10 messages per request)
+  - Process and Delete the message using `DeleteMessage` API
+- Consumers receive messages in parallel(can scale consumers horizontally for more throughput)
+- Use CW alarm to scale ASG
+- Encryption:
+  - at rest using KMS 
+  - inflight using HTTPS API
+  - client-side encryption ->  encryption/decryption by client
+- Use IAM to manage access to SQS 
+- SQS Access Policies:
+  - for cross-account access
+  - allowing other services to write to a queue
+- Message Visibility Timeout:
+  - When message polled by a consumer it becomes invisible
+  - Default 30 sec
+  - Avoid double processing a message by `ChangeMessageVisibility` API(increase timeout)
+  - If timeout too high, retry will take too long in case of failure
+  - If timeout too short, may get double processed
+- Dead Letter Queue
+  - Failed message goes back to queue, but we can limit how many times(`MaximumReceives`)
+  - After `MaximumReceives` it can go to a DLQ
+  - Why? Debugging(be aware of retention period)
+- Delay Queue
+  - Delay message(up to 15 minutes) before consumer can see it
+  - Can set at send using `DelaySeconds` param(default 0 sec)
+- Long Polling
+  - If no message in Q wait for message to arrive
+  - decreases the number of API calls
+  - Enable using `WaitTimeSeconds`(API or queue level), preferable to short polling
+  - Large messages(> 256KB) send message to S3 and metadata to queue(use SQS Extended Client)
+  - Some API calls:
+    - `PurgeQueue` -  delete all the messages in Q
+    - `CreateQueue`, `CreateQueue`, `SendMessage`, `ReceiveMessage`, `DeleteMessage`, `MaxNumberOfMessages`, `ReceiveMessageWaitTimeSeconds`, `ChangeMessageVisibility` 
+    - use Batch API calls where possible to decrease cost!
+  - FIFO Queue
+    - Messages can be processed in order
+    - Throughput limit = 300 msg/s without batching or 3000 msg/s
+    - Removes duplicates(Deduplication in 5 minutes)
+      - SHA-256 hash of the message body to perform content based de-dup
+      - or by provided `Message Deduplication ID`
+    - Message Grouping
+      - Use `MessageGroupID` 
+      - If using the same value, only one consumer will receive messages
+      - Each `MessageGroupID` can have different consumers
+      - Messages ordered withing groups, but not guaranteed across groups
+ 
 # [Back to content](#content)
