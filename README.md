@@ -91,6 +91,7 @@
 - [X-Ray](#X-Ray)
 - [CloudTrail](#CloudTrail)
 - [SQS](#SQS)
+- [SNS](#SNS)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1063,4 +1064,34 @@ subnet, stateless, subnet rules for inbound and outbound
       - Each `MessageGroupID` can have different consumers
       - Messages ordered withing groups, but not guaranteed across groups
  
+# [Back to content](#content)
+
+## SNS
+- **Simple Notification Service**, sends message to a single SNS topic
+- Many "receivers" / subscriptions can listen to an SNS topic(all of them gets all the messages)
+- Many subscriptions per topic(up to 10,000,000 and 100,000 topics limit)
+- Subscribers can be `SQS`, `HTTP / HTTPS`, `Lambda`, `Email`, `Text`, `mobile notification`
+- Many AWS services can send data to SNS(CloudWatch, ASG, S3, CF, etc.)
+- Publish:
+  - `Topic publish`(SDK) = Create topic -> Create a subscription -> Publish the topic
+  - `Direct publish`(Mobile app SDK) = Create platform application -> Create platform endpoint -> Publish to endpoint(Google GCM, Apple APNS, Amazon ADM)
+- Encryption just like SQS:
+  - at rest using KMS 
+  - inflight using HTTPS API
+  - client-side encryption ->  encryption/decryption by client
+- Use IAM to manage access to SNS API 
+- SNS Access Policies(Similar to S3 or SQS):
+  - for cross-account access
+  - allowing other services to write to an SNS topic
+- SNS + SQS = `Fan Out`: 
+  - One push to SNS receives all SQS subscribers
+  - Decoupled and no data loss
+  - Can scale by adding more SQS subscribers over time
+  - SQS access policy must allow SNS to write
+  - can send S3 event to multiple queues with `fan out`
+- FIFO Topic -> ordering messages in a topic:
+  - Ordering and Deduplication and throughput limitation similar to SQS
+  -  **! Only SQS FIFO queues can be subscribers !**
+- Filter messages using JSON policy(subscription without filter policy receives all messages from topic)
+
 # [Back to content](#content)
