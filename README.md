@@ -15,7 +15,7 @@
 - [EC2 Storage](#ec2-storage)
   - [EC2 Instance Storage](#ec2-instance-storage)
   - [Elastic Block Store](#Elastic-Block-Store)
-  - [EFS / Elastic File System](#EFS-/-Elastic-File-System)
+  - [Elastic File System](#Elastic-File-System)
 - [Load Balancing and Auto Scaling](#Load-Balancing-and-Auto-Scaling)
   - [Load balancer](#Load-balancer)
   - [Types of Load balancer](#Types-of-Load-balancer)
@@ -182,7 +182,7 @@ EC2 Instance Storage are high-performance hardware disk(EBS are network drives w
   - Requirement: file system that’s cluster-aware
 ![image](https://user-images.githubusercontent.com/22743709/125519494-41f9b4b5-f0dd-423e-8696-a818c9282398.png)
 
-### EFS / Elastic File System
+### Elastic File System
 - NFS (network file system) that can be mounted on many EC2
 - Can be used multi-AZ
 - use-cases: content management, web serving, data sharing
