@@ -12,9 +12,9 @@
   - [EC2 Instance types](#ec2-instance-types)
   - [Security Groups](#security-groups)
   - [Purchasing Options](#purchasing-options)
-- [EC2 Instance Storage](#ec2-instance-storage)
-  - [EBS Volume Types and Use cases](#EBS-Volume-Types-and-Use-cases)
-  - [EBS Multi-Attach](#EBS-Multi-Attach)
+- [EC2 Storage](#ec2-storage)
+  - [EC2 Instance Storage](#ec2-instance-storage)
+  - [Elastic Block Store](#Elastic-Block-Store)
   - [EFS / Elastic File System](#EFS-/-Elastic-File-System)
 - [Load Balancing and Auto Scaling](#Load-Balancing-and-Auto-Scaling)
   - [Load balancer](#Load-balancer)
@@ -164,20 +164,23 @@ Can run a bootstrap script at first boot to setup(EC2 User data script)
 
 # [Back to content](#content)
 
-## EC2 Instance Storage
+## EC2 Storage
+### EC2 Instance Storage
 EC2 Instance Storage are high-performance hardware disk(EBS are network drives with limited performance)
 - ephemeral storage(loses data once they got stopped)
 - use-cases: buffer / cache / scratch data / temp storage
 
-### EBS Volume Types and Use cases
-- `General Purpose SSD`: cheap and low latency, good for System boot volumes,Virtual desktops, Dev environments
-- `Provisioned IOPS (PIOPS) SSD`: sustained IOPS or applications that need more than 16,000 IOPS, e.g databases workloads (sensitive to storage perf and consistency)
-- `Hard Disk Drives (HDD)`: cannot be boot volume, throughput optimized HDD (st1)
-good for big data, data Warehouses or cold HDD (sc1) data that is infrequently accessed. 
-
-### EBS Multi-Attach
-- Allows attaching EBS to multiple EC2 instances(same AZ)
-- Requirement: file system that’s cluster-aware
+### Elastic Block Store
+- Raw block-level storage that can be attached to EC2 instances
+- EBS Volume Types and Use cases
+  - `General Purpose SSD`: cheap and low latency, good for System boot volumes,Virtual desktops, Dev environments
+  - `Provisioned IOPS (PIOPS) SSD`: sustained IOPS or applications that need more than 16,000 IOPS, e.g databases workloads (sensitive to storage perf and consistency)
+  - `Hard Disk Drives (HDD)`: cannot be boot volume, throughput optimized HDD (st1)
+  good for big data, data Warehouses or cold HDD (sc1) data that is infrequently accessed. 
+- EBS Multi-Attach
+  - Allows attaching EBS to multiple EC2 instances(same AZ)
+  - Requirement: file system that’s cluster-aware
+![image](https://user-images.githubusercontent.com/22743709/125519494-41f9b4b5-f0dd-423e-8696-a818c9282398.png)
 
 ### EFS / Elastic File System
 - NFS (network file system) that can be mounted on many EC2
