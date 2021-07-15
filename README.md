@@ -413,7 +413,7 @@ reservation of domain names(such as GoDaddy), but third party also can be used
 - NAT Gateway(AWS managed) / NAT Instances(self managed): give internet access to private subnets while remaining private
 - NACL: Firewall which controls traffic from and to
 subnet, stateless, subnet rules for inbound and outbound
-- Security Groups: Firewall that controls traffic to and from an instance(e.g EC2), stateful, operate at the EC2 instance level or ENI
+- Security Groups: Firewall that controls traffic to and from an instance(e.g EC2), stateful, operate at the EC2 instance level or ENI([Elastic network interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html))
 - VPC Peering: Connect two VPC with non overlapping IP ranges, non transitive(all VPC needs explicit peering to connect)
 - VPC Endpoints: Provide private access to AWS Services within VPC(enhanced security and low latency)
 - VPC Flow Logs: network traffic logs
