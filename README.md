@@ -92,6 +92,7 @@
 - [CloudTrail](#CloudTrail)
 - [SQS](#SQS)
 - [SNS](#SNS)
+- [Kinesis](#Kinesis)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1096,5 +1097,32 @@ subnet, stateless, subnet rules for inbound and outbound
   - Ordering and Deduplication and throughput limitation similar to SQS
   -  **! Only SQS FIFO queues can be subscribers !**
 - Filter messages using JSON policy(subscription without filter policy receives all messages from topic)
+
+# [Back to content](#content)
+
+## Kinesis
+- To real-time `collect`, `process`, and `analyze` streaming data
+- **Kinesis Data Streams** -> capture, process, and store data streams
+  - Billing per shard provisioned(unlimited shards)
+  - Retention 1-365 days(default 1 day)
+  - Can reprocess(replay) data
+  - Immutabile, data cannot be deleted from kinesis
+  - Producers: AWS SDK / Kinesis Producer Library (KPL) / Kinesis Agent
+  - Consumers: Can write your own client(Kinesis Client Library (KCL) / AWS SDK) or managed services such as AWS Lambda, Kinesis Data Firehose, Kinesis Data Analytics
+  - Security:
+    - Access control and authorization using IAM policies
+    - Encryption in flight(HTTPS endpoints)
+    - KMS for encryption at rest
+    - Alternatively implement client side encryption
+    - VPC Endpoints to access data within a VPC
+    - CloudTrail to monitor API calls
+  - Data record consists of `sequence number`, `partition key` and `data blob`
+  - Write throughput 1 MB/sec or 1000 records/sec per shard
+  - Can use batching to reduce cost and increase throughput(PutRecords API)
+  - Shared (Classic) Fan-out Consumer slower but cheaper, Consumers poll data from Kinesis using GetRecords API call
+  - Enhanced Fan-out Consumer -> Kinesis pushes data to consumers over HTTP/2 (SubscribeToShard API)
+- **Kinesis Data Firehose** -> load data streams into data stores
+- **Kinesis Data Analytics** analyze data streams(using SQL/Apache Flink)
+- **Kinesis Video Streams** capture, process, store video streams
 
 # [Back to content](#content)
