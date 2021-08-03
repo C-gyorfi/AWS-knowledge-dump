@@ -93,6 +93,7 @@
 - [SQS](#SQS)
 - [SNS](#SNS)
 - [Kinesis](#Kinesis)
+  - [Comparison](#Comparison)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1121,8 +1122,36 @@ subnet, stateless, subnet rules for inbound and outbound
   - Can use batching to reduce cost and increase throughput(PutRecords API)
   - Shared (Classic) Fan-out Consumer slower but cheaper, Consumers poll data from Kinesis using GetRecords API call
   - Enhanced Fan-out Consumer -> Kinesis pushes data to consumers over HTTP/2 (SubscribeToShard API)
+  Lambda as consumer:
+    - Reads data in batches(can configure batch size and window)
+    - Lambda retires until data expired or successful
+    - Can process 10 baches / shard 
+  - KCL(Kinesis Client Library)
+    - Java lib
+    - 1 KCL instance per shard(e.g `n` shard -> max. `n` KCL instance)
+    - Can integrate with DynamoDB (progress / share the work amongst shards)
+  - `Shard Splitting` -> divide "hot shards"
+  - `Merging Shards` -> save costs by decreasing stream capacity(reduce "cold shards")
 - **Kinesis Data Firehose** -> load data streams into data stores
+  - Fully managed service
+  - Integrate with:
+    - AWS services such as Redshift / Elastic search / S3D
+    - 3rd party such as MongoDB, DataDog, Splunk
+    - par per data going trough
+    - Near real time(buffer time min. 60 sec) opposed to Kinesis Data Streams real-time!(200ms)
 - **Kinesis Data Analytics** analyze data streams(using SQL/Apache Flink)
+  - Fully managed
+  - Real-time SQL analytics on Kinesis Streams
 - **Kinesis Video Streams** capture, process, store video streams
+
+### Comparison
+
+| SQS | SNS | Kinesis |
+| :------- | :------- | :------- |
+|Pull data(consumer)|Push data(to subscribers) | Pull data(consumer)|
+|Data deleted once consumed | Data lost if not delivered(not persisted) | Can replay data |
+|unlimited consumers | 10,000,000 subscribers|unlimited consumers |
+|No need to provision throughput  | No need to provision throughput |Need to provision throughput |
+|Only FIFO queues can send data in order | FIFO for ordering/deduplicating messages | Ordering data at shard level |
 
 # [Back to content](#content)
