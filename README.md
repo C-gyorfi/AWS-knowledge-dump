@@ -94,6 +94,7 @@
 - [SNS](#SNS)
 - [Kinesis](#Kinesis)
   - [Comparison](#Comparison)
+- [Lambda](#Lambda)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1153,5 +1154,37 @@ subnet, stateless, subnet rules for inbound and outbound
 |unlimited consumers | 10,000,000 subscribers|unlimited consumers |
 |No need to provision throughput  | No need to provision throughput |Need to provision throughput |
 |Only FIFO queues can send data in order | FIFO for ordering/deduplicating messages | Ordering data at shard level |
+
+# [Back to content](#content)
+
+## Lambda
+- AWS's Serverless offering aka `Function as a Service`
+- Pay per request and compute time
+- Resources up to 10GB RAM(increase RAM to increase CPU and network)
+- Supports plenty of languages(Node, Ruby, Python, Java, GO, C#)
+- Container image must implement Lambda runtime API(ECS/Fargate is better for running  containerised apps e.g Docker)
+- Many service can trigger lambda execution e.g S3, cloudwatch events(CRON)
+- Pricing:
+  - Per call:
+    - First 1,000,000 requests are free
+    - Then $0.20 per 1 million requests = $0.0000002/req
+  - Per duration:
+    - Free 400,000 GB compute time / month
+    - Then $1.00 for 600,000 GB-seconds
+- Synchronous invocations:
+  - Response returned right-away, means error handling must implemented client site
+  - Can be ALB, API Gateway, SDK, CLI etc.
+- Lambda@Edge 
+  - Can be used to integrate with CloudFront to use Lambda to change CloudFront requests and responses
+    - customise CDN content
+    - more responsive
+    - request filtering
+- Asynchronous invocations:
+  - Why? allows speeding up processing(no need to wait response)
+  - Invokes from S3, SNS, CloudWatchEvents, CodeCommit, CodePipeline etc.
+  - Puts events in an Event Queue
+  - Retry on errors(can cause duplicate logs in CW logs)
+  - DLQ for failed processes
+- S3 invoke: 2 writes in the same time can cause single invocation, protect against this by enabling versioning
 
 # [Back to content](#content)
