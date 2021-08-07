@@ -1160,6 +1160,8 @@ subnet, stateless, subnet rules for inbound and outbound
 ## Lambda
 - AWS's Serverless offering aka `Function as a Service`
 - Pay per request and compute time
+- Max execution time 900sec =15 mins]
+- Env variables 4KB
 - Resources up to 10GB RAM(increase RAM to increase CPU and network)
 - Supports plenty of languages(Node, Ruby, Python, Java, GO, C#)
 - Container image must implement Lambda runtime API(ECS/Fargate is better for running  containerised apps e.g Docker)
@@ -1186,5 +1188,85 @@ subnet, stateless, subnet rules for inbound and outbound
   - Retry on errors(can cause duplicate logs in CW logs)
   - DLQ for failed processes
 - S3 invoke: 2 writes in the same time can cause single invocation, protect against this by enabling versioning
+- IAM Role - Execution Role
+  - Gives permissions Lambda to call AWS services
+- Resource Based Policies:
+  - Gives other accounts and services permission to use the Lambda resources
+- By default a Lambda function launched in an "AWS-owned" VPC
+  - define the VPC ID the subnets and the security groups
+  - Elastic Network Interface will be created in the given subnet
+  - Add `AWSLambdaVPCAccessExecutionRole`
+  - For internet access -> add a NAT gateway in the private subnet
+  - VPC endpoints for accessing other AWS services privately
+- To increase CPU, increase RAM:
+  - Use multi-threading in code to benefit from it multi CPU(>1,792 MB RAM)
+- Execution context:
+  - temporary runtime environment
+  - init external dependencies, database connections, HTTP clients, SDK clients
+  - next function invocation can “re-use” the context 
+  - includes `/tmp` directory(max 512MB)
+  - init DB connection outside handler to take advantage of it
+- Concurrency limit(1000 concurrent executions)
+  - Can set reserved concurrency
+  - Exceeding limit will `Throttle`
+    - synchronous invocation -> ThrottleError - 429
+    - asynchronous invocation -> retry and send to DLQ
+- Cold Start
+  - Init code and code outside the handler run
+  - large dependencies/SDK can take long
+  - first request = higher latency 
+  - provisioned Concurrency
+    - Concurrency is allocated in advance and cold start never happens
+    - Auto Scaling can manage concurrency(schedule/target utilization)
+- Dependencies:
+  - to be zipped with code
+  - <50MB upload straight to Lambda
+  - >50MB upload to S3
+- Lambda Layers
+  - Reuse dependencies
+  - Custom Runtimes
+- Containerised applications:
+  - up to 10GB from ECR
+  - use the AWS provided base images or
+  - create own, must implement `Lambda Runtime API`
+  - `Lambda Runtime Interface Emulator` -> to run locally
+- Lambda Versions:
+  - `$LATEST`
+  - Versions are immutable
+  - Each version has own ARN
+  - Each version of a lambda can be accessed
+- Aliases:
+  - pointers to versions
+  - mutable
+  - enable Blue / Green deployment(weighted)
+  - allows stable configuration(have their own ARN)
+- CodeDeploy:
+  - To automate deployment
+  - AllAtOnce
+  - Linear(grow traffic over time until 100%)
+  - Canary(X% then point all traffic to new version)
+- Event source mapping
+  - Poll resource such as DynamoDB Streams, Kinesis, SQS and invoke Lambda
+  - Lambda invoked synchronously
+  - Streams such as DynamoDB or Kinesis
+    - Iterates trough each shard, items in order
+    - Processed items are not removed from stream
+    - Use batch window to accumulate records when there is a low traffic
+    - Can process multiple batches in parallel
+    - Entire batch reprocessed when there is an error
+  - SQS / SQS FIFO
+    - Long polling SQS
+    - Set queue visibility timeout 6X the timeout of the lambda 
+    - Can setup DLQ on the SQS not on the Lambda
+  - Scaling:
+
+| Kinesis Data/DynamoDB Streams | SQS Standard | SQS FIFO |
+| :------- | :------- | :------- |
+|up to 10 batches processed per shard| Up to 1000 batches of messages|Up to the number of active message groups|
+
+- Destinations: 
+  - can define for successful and failed event(Asynchronous)
+    - SNS, SQS, Lambda, EventBridge
+  - Recommended instead of DLQ
 
 # [Back to content](#content)
