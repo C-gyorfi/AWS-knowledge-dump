@@ -1220,8 +1220,8 @@ subnet, stateless, subnet rules for inbound and outbound
     - Auto Scaling can manage concurrency(schedule/target utilization)
 - Dependencies:
   - to be zipped with code
-  - <50MB upload straight to Lambda
-  - >50MB upload to S3
+  - `<50MB` upload straight to Lambda
+  - `>50MB` upload to S3
 - Lambda Layers
   - Reuse dependencies
   - Custom Runtimes
@@ -1268,5 +1268,29 @@ subnet, stateless, subnet rules for inbound and outbound
   - can define for successful and failed event(Asynchronous)
     - SNS, SQS, Lambda, EventBridge
   - Recommended instead of DLQ
+
+# [Back to content](#content)
+
+## DynamoDB
+- Managed, Highly available, Multi-Az(3 AZ)
+- NoSQL
+- Millions of requests per seconds
+- Highly scalable / distributed database
+- Good for event driven workflow(DynamoDB Streams)
+- Low cost and auto scaling
+- Max size of item 400KB
+- Primary Keys can be `Partition key` or `Partition key+Sort Key`
+- Provisioned Throughput:
+  - Table must have provisioned: `Read Capacity Units (RCU)` and `Write Capacity Units (WCU)`
+  - Can be exceeded temporarily -> “burst credit” 
+    - `ProvisionedThroughputException` if not set
+- Write Capacity Units:
+  - 1 write / second for an item 
+  - up to 1 KB in size
+- Read Capacity Units: 16 eventually consistent reads per seconds of 12 KB each
+  - 1 strongly consistent read or 2 eventually consistent read / second
+  - Up to 4KB in size
+  - `>4KB` more RCU used
+- Read can be `Eventually Consistent`(default) or `Strongly Consistent`
 
 # [Back to content](#content)
