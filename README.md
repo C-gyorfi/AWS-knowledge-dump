@@ -1292,5 +1292,30 @@ subnet, stateless, subnet rules for inbound and outbound
   - Up to 4KB in size
   - `>4KB` more RCU used
 - Read can be `Eventually Consistent`(default) or `Strongly Consistent`
-
+- Throttling `ProvisionedThroughputException` can be caused by:
+  - Hot keys: a partition key is being read too many times
+  - Hot partitions
+  - Large item(DynamoDB Accelerator (DAX) if needs more RCU)
+- Writing:
+  - `PutItem` => new item or replace existing
+  - `UpdateItem` => partial update
+  - `Conditional Writes` => useful for concurrent access to items
+  - `BatchWriteItem` => can reduce the number of API calls
+- Reading: 
+  - `GetItem`
+  - `BatchGetItem`
+  - `Query`:
+    - `FilterExpression` applied client side, no change to RCU
+    - can do pagination
+  - `Scan`:
+    - inefficient => scan the entire table and then filter
+    - `ProjectionExpression` => to get only some, rather than all of the attributes
+    - `Local Secondary Index` => alternative sort key, create one or more local secondary indexes on a DynamoDB table and issue Query or Scan requests against these indexes
+    - `Global secondary index` => lets you query over the entire table, across all partitions
+      - When writes are throttled on the `GSI`, then main table also throttled
+- DynamoDB Streams:
+  - Can stream table changes into `DynamoDB Streams`
+    - Can read by Lambda & EC2 instances
+    - Can do cross region replication with Streams
+  - 24 hours of data retention
 # [Back to content](#content)
