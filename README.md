@@ -95,6 +95,7 @@
 - [Kinesis](#Kinesis)
   - [Comparison](#Comparison)
 - [Lambda](#Lambda)
+- [DynamoDB](#DynamoDB)
 
 ## IAM & AWS CLI
 - **IAM** stands for **Identity and Access Management**
@@ -1318,4 +1319,27 @@ subnet, stateless, subnet rules for inbound and outbound
     - Can read by Lambda & EC2 instances
     - Can do cross region replication with Streams
   - 24 hours of data retention
+  - Made of shards just like Kinesis Data Streams(shards are provisioned by AWS)
+  - Records populated in the stream once enabled(no "retroactive" population)
+  - Lambda needs `Event Source Mapping` to read from the Streams
+    - Lambda invoked synchronously
+- TTL:
+  - Can set expiry time for items
+  - Deletions does not use WCU/RCU and no extra cost 
+  - Helps managing storage and adhere to regulations
+  - Enabled per row
+  - Expired items are automatically deleted within 48 hours
+- DynamoDB Transactions:
+  - All or nothing type of operation(e.g write Transaction and AccountBalance tables)
+  - To `Create` / `Update` / `Delete` multiple rows in different tables at the same time
+  - Write Modes are `Standard`, `Transactional`
+  - Read Modes are `Eventual Consistency`, `Strong Consistency`, `Transactional`
+  - Consume 2X of WCU/RCU
+    - Capacity computation:
+      ```
+        [item size] / [1KB per WCU or 4KB per RCU] * 2(transactional) * [3 for writes or 5 for reads]
+      ```
+  - API: `TransactWriteItems` / `TransactGetItems`
+- Use Amazon DMS to migrate to DynamoDB (from Mongo, Oracle, MySQL, S3, etc...) 
+
 # [Back to content](#content)
